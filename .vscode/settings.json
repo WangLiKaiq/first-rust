@@ -1,0 +1,17 @@
+{
+    "cSpell.words": [
+        "actix",
+        "sqlx"
+    ],
+    "rust.checkWith": "clippy",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnType": true,
+    "rust.useNewErrorFormat": true,
+    "editor.semanticTokenColorCustomizations": {
+        "enabled": true
+    },
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer"
+    }
+}

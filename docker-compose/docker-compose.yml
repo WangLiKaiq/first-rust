@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:8.0
+    ports:
+      - "13306:3306"
+    networks:
+      - mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: komorebi
+      MYSQL_USER: backend_user
+      MYSQL_PASSWORD: backend_password
+      MYSQL_ROOT_PASSWORD: root_password
+      TZ: UTC
+    volumes:
+      - mysql_data:/var/lib/postgresql/data
+      - ./mysql/init:/docker-entrypoint-initdb.d
+
+  redis:
+    image: redis:7
+    container_name: my_redis
+    restart: unless-stopped
+    ports:
+      - "16379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+
+networks:
+  mysql:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
