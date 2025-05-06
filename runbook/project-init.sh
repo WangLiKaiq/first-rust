@@ -32,7 +32,7 @@ done
 cargo install sea-orm-cli --features mysql --force
 
 # 5. Point your DATABASE_URL
-export DATABASE_URL="mysql://backend_user:backend_password@127.0.0.1:13306/komorebi"
+export DATABASE_URL="mysql://backend_user:backend_password@127.0.0.1:13306/client"
 
 # 6. Generate SeaORM entities *inside* each service
 sea-orm-cli generate entity -u $DATABASE_URL -o client/src/entities
