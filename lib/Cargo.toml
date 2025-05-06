@@ -17,3 +17,8 @@ tracing = { version = "0.1.41", features = ["log"] }
 tracing-bunyan-formatter = "0.3.10"
 tracing-log = "0.2.0"
 dotenvy = "0.15"
+
+[dependencies.uuid]
+version = "1.16.0"
+# Lets you generate random UUIDs
+features = ["v4"]
