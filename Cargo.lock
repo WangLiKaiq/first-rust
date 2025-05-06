@@ -561,7 +561,7 @@ name = "client"
 version = "0.1.0"
 
 [[package]]
-name = "client-migration"
+name = "client_migration"
 version = "0.1.0"
 dependencies = [
  "async-std",
@@ -989,10 +989,11 @@ name = "gateway"
 version = "0.1.0"
 
 [[package]]
-name = "gateway-migration"
+name = "gateway_migration"
 version = "0.1.0"
 dependencies = [
  "async-std",
+ "sea-orm",
  "sea-orm-migration",
 ]
 
@@ -1826,10 +1827,11 @@ name = "price"
 version = "0.1.0"
 
 [[package]]
-name = "price-migration"
+name = "price_migration"
 version = "0.1.0"
 dependencies = [
  "async-std",
+ "sea-orm",
  "sea-orm-migration",
 ]
 
