@@ -1,3 +1,6 @@
+## Examples
+
+```rust
 mod entities;
 use chrono::Utc;
 use dotenvy::dotenv;
@@ -21,3 +24,5 @@ async fn demo() -> Result<(), anyhow::Error> {
     dbg!(res);
     Ok(())
 }
+
+```

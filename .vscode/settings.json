@@ -5,11 +5,9 @@
         "dotenvy",
         "sqlx"
     ],
-    "rust.checkWith": "clippy",
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
     "editor.formatOnType": true,
-    "rust.useNewErrorFormat": true,
     "rust-analyzer.cargo.autoreload": true,
     "rust-analyzer.procMacro.enable": true,
     "editor.semanticTokenColorCustomizations": {

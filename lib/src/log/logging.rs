@@ -5,13 +5,16 @@ use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_log::LogTracer;
 use tracing_subscriber::fmt::MakeWriter;
 use tracing_subscriber::{EnvFilter, Registry, layer::SubscriberExt};
+
+use crate::env::load_system_properties;
 static INIT: Once = Once::new();
 
 #[ctor::ctor]
 pub fn init_subscriber() {
     INIT.call_once(|| {
-        let default_filter_level = env::var("RUST_LOG").unwrap_or_else(|_| "info".to_string());
-        let subscriber_name = "test".to_string();
+        load_system_properties();
+        let default_filter_level = "info".to_string();
+        let subscriber_name = env::var("APP").unwrap_or_else(|_| String::from("server"));
         LogTracer::init().expect("Unable to setup log tracer!");
         let subscriber = if env::var("TEST_LOG").is_ok() {
             get_subscriber(subscriber_name, &default_filter_level, std::io::stdout)
@@ -19,7 +22,6 @@ pub fn init_subscriber() {
             get_subscriber(subscriber_name, &default_filter_level, std::io::stdout)
         };
         set_global_default(subscriber).expect("Failed to set subscriber");
-        tracing::info!("The current log level is {}", default_filter_level);
     });
 
     tracing::info!("Logging initialized globally.");
