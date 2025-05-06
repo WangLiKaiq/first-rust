@@ -1,6 +1,8 @@
 {
     "cSpell.words": [
         "actix",
+        "dotenv",
+        "dotenvy",
         "sqlx"
     ],
     "rust.checkWith": "clippy",
