@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   mysql:
-    container_name: mysql
+    container_name: backend_mysql
     image: mysql:8.0
     ports:
       - "13306:3306"
@@ -10,9 +10,6 @@ services:
       - mysql
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: komorebi
-      MYSQL_USER: backend_user
-      MYSQL_PASSWORD: backend_password
       MYSQL_ROOT_PASSWORD: root_password
       TZ: UTC
     volumes:
@@ -21,7 +18,7 @@ services:
 
   redis:
     image: redis:7
-    container_name: my_redis
+    container_name: backend_redis
     restart: unless-stopped
     ports:
       - "16379:6379"
