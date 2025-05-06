@@ -2,12 +2,33 @@
 name = "komorebi"
 version = "0.1.0"
 edition = "2024"
+authors = ["komorebi"]
+
+[lib]
+path = "src/lib.rs"
+
+# Notice the double square brackets: it's an array in TOML's syntax.
+# We can only have one library in a project, but we can have multiple binaries!
+# If you want to manage multiple libraries in the same repository
+# have a look at the workspace feature - we'll cover it later on.
+[[bin]]
+path = "src/main.rs"
+name = "komorebi"
 
 [dependencies]
-sea-orm = { version = "1.1.0", features = [
-    "sqlx-mysql",
-    "runtime-async-std-native-tls",
-    "macros",
-] }
+
 [build-dependencies]
 sea-orm-cli = "1.1.10"
+
+# We need to add this,so the code introspection is also working for the migration project.
+[workspace]
+members = [
+    "lib",
+    "utils",
+    "client",
+    "client/migration",
+    "gateway",
+    "gateway/migration",
+    "price",
+    "price/migration",
+]
