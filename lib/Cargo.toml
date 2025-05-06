@@ -4,3 +4,16 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+ctor = "^0.4"
+#tracing
+tracing-subscriber = { version = "0.3", features = [
+    "env-filter",
+    "fmt",
+    "json",
+    "registry",
+    "env-filter",
+] }
+tracing = { version = "0.1.41", features = ["log"] }
+tracing-bunyan-formatter = "0.3.10"
+tracing-log = "0.2.0"
+dotenvy = "0.15"

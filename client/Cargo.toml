@@ -19,6 +19,7 @@ chrono = { version = "0.4.41", default-features = false, features = ["clock"] }
 anyhow = "1.0.98"
 # need this to load the .env file
 dotenvy = "0.15"
+tracing = { version = "0.1.41", features = ["log"] }
 [dependencies.uuid]
 version = "1.16.0"
 # Lets you generate random UUIDs

@@ -1,4 +1,9 @@
+use lib::env::load_system_properties;
+use lib::log::init_subscriber;
+
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
-    println!("Hello, World!")
+    load_system_properties();
+    init_subscriber();
+    Ok(())
 }
