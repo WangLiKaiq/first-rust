@@ -11,13 +11,7 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Users::Table)
                     .if_not_exists()
-                    .col(
-                        ColumnDef::new(Users::Id)
-                            .big_unsigned()
-                            .not_null()
-                            .auto_increment()
-                            .primary_key(),
-                    )
+                    .col(ColumnDef::new(Users::Id).uuid().not_null().primary_key())
                     .col(
                         ColumnDef::new(Users::Username)
                             .string()
@@ -30,11 +24,7 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .unique_key(),
                     )
-                    .col(
-                        ColumnDef::new(Users::PasswordHash)
-                            .text()
-                            .not_null(),
-                    )
+                    .col(ColumnDef::new(Users::PasswordHash).text().not_null())
                     .col(
                         ColumnDef::new(Users::CreatedAt)
                             .timestamp()

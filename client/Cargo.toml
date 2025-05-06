@@ -4,6 +4,22 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-
+# add common project as dependencies
 utils = { path = "../utils" }
 lib = { path = "../lib" }
+
+tokio = { version = "1.44.2", features = ["rt", "macros", "rt-multi-thread"] }
+# ORM
+sea-orm = { version = "1.1.0", features = [
+    "sqlx-mysql",
+    "runtime-async-std-native-tls",
+    "macros",
+] }
+chrono = { version = "0.4.41", default-features = false, features = ["clock"] }
+anyhow = "1.0.98"
+# need this to load the .env file
+dotenvy = "0.15"
+[dependencies.uuid]
+version = "1.16.0"
+# Lets you generate random UUIDs
+features = ["v4"]
