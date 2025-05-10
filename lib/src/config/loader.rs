@@ -1,18 +1,6 @@
 use anyhow::Context;
-use serde::{Deserialize, de::DeserializeOwned};
-use serde_aux::field_attributes::deserialize_number_from_string;
+use serde::de::DeserializeOwned;
 
-#[derive(serde::Deserialize, Clone)]
-pub struct Settings {
-    pub application: ApplicationSettings,
-}
-
-#[derive(serde::Deserialize, Clone)]
-pub struct ApplicationSettings {
-    pub host: String,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub port: u16,
-}
 pub fn get_configuration<T>() -> Result<T, anyhow::Error>
 where
     T: DeserializeOwned,

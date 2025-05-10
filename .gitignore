@@ -1,2 +1,3 @@
 /target
 /migration/target
+*.DS_Store*

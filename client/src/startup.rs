@@ -1,10 +1,10 @@
 use actix_web::dev::Server;
 use actix_web::{App, HttpServer, web};
-use lib::config::Settings;
 use lib::http::tracing::TraceMiddleware;
 use lib::log::init_subscriber;
 use std::net::TcpListener;
 
+use crate::config::Settings;
 use crate::test::test_endpoint::test;
 pub struct Application {
     server: Server,
