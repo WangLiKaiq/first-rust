@@ -18,6 +18,9 @@ tracing-bunyan-formatter = "0.3.10"
 tracing-log = "0.2.0"
 dotenvy = "0.15"
 
+actix-web = { version = "4.10.2", optional = false }
+futures-util = { version = "0.3.31", optional = false }
+
 [dependencies.uuid]
 version = "1.16.0"
 # Lets you generate random UUIDs
