@@ -82,3 +82,51 @@ pub async fn save_user(db: &DatabaseConnection, user: SaveUser) -> Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::entities::users;
+    use actix_web::body::MessageBody;
+    use dotenvy::dotenv;
+    use lib::rand::rand_string;
+    use sea_orm::entity::prelude::*;
+    use sea_orm::{ConnectionTrait, Database, Schema};
+    use secrecy::SecretString;
+    use uuid::Uuid;
+
+    impl SaveUser {
+        fn rand() -> Self {
+            Self {
+                id: Some(Uuid::new_v4()),
+                username: Some(rand_string(10)),
+                password: Some(HashedPassword(SecretString::from(rand_string(10)))),
+                email: Some(SecretString::from(rand_string(10))),
+            }
+        }
+    }
+    #[tokio::test]
+    async fn save_and_get_user_credentials_mysql() -> Result<()> {
+        dotenv().ok();
+        let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set in .env");
+        let db = Database::connect(&db_url).await?;
+
+        let user = SaveUser::rand();
+
+        // Save user
+        save_user(&db, user.clone()).await?;
+
+        // Get credentials
+        let creds = get_stored_credentials(&user.username.unwrap(), &db).await?;
+        assert!(creds.is_some());
+
+        let (fetched_id, fetched_hash) = creds.unwrap();
+        assert_eq!(fetched_id, user.id.unwrap());
+        assert_eq!(
+            fetched_hash.0.expose_secret(),
+            user.password.unwrap().0.expose_secret()
+        );
+
+        Ok(())
+    }
+}
