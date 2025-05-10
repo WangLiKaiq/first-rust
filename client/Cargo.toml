@@ -26,7 +26,7 @@ secrecy = { version = "^0.10", features = ["serde"] }
 # actix
 actix-web = "^4.10"
 actix-http = "^3.10"
-
+argon2 = { version = "0.5.3", features = ["std"] }
 [dependencies.uuid]
 version = "1.16.0"
 # Lets you generate random UUIDs
