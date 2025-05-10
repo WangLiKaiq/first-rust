@@ -86,11 +86,8 @@ pub async fn save_user(db: &DatabaseConnection, user: SaveUser) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::authentication::RawPassword;
-    use argon2::password_hash::SaltString;
-    use dotenvy::dotenv;
-    use lib::rand::{rand_b64, rand_string};
-    use sea_orm::Database;
+    use crate::authentication::{PasswordSalt, RawPassword};
+    use lib::{db::get_conn_from_config, env::load_system_properties, rand::rand_string};
     use secrecy::SecretString;
     use uuid::Uuid;
 
@@ -98,11 +95,11 @@ mod tests {
         fn rand() -> Self {
             Self {
                 id: Some(Uuid::new_v4()),
-                username: Some(rand_string(10)),
+                username: Some(rand_string(16)),
                 password: Some(
                     HashedPassword::hash(
                         &RawPassword(SecretString::from(rand_string(10))),
-                        &SaltString::from_b64(rand_b64(10).as_str()).unwrap(),
+                        PasswordSalt::rand(),
                     )
                     .unwrap(),
                 ),
@@ -113,15 +110,17 @@ mod tests {
 
     #[tokio::test]
     async fn should_insert_user_correctly() {
-        dotenv().ok();
+        load_system_properties();
 
         let user = SaveUser::rand();
-
+        let conn = get_conn_from_config().await.unwrap();
         // Save user
-        save_user(&db, user.clone()).await?;
+        save_user(&conn, user.clone()).await.unwrap();
 
         // Get credentials
-        let creds = get_stored_credentials(&user.username.unwrap(), &db).await?;
+        let creds = get_stored_credentials(&user.username.unwrap(), &conn)
+            .await
+            .unwrap();
         assert!(creds.is_some());
 
         let (fetched_id, fetched_hash) = creds.unwrap();
@@ -132,6 +131,28 @@ mod tests {
         );
     }
 
-    #[test]
-    async fn should_update_the_user_correctly() {}
+    #[tokio::test]
+    async fn should_update_the_user_correctly() {
+        load_system_properties();
+        let user = SaveUser::rand();
+        let conn = get_conn_from_config().await.unwrap();
+        save_user(&conn, user.clone()).await.unwrap();
+        let updated_user = SaveUser {
+            username: Some(rand_string(10)),
+            ..user
+        };
+
+        save_user(&conn, updated_user.clone()).await.unwrap();
+        let creds = get_stored_credentials(&updated_user.username.unwrap(), &conn)
+            .await
+            .unwrap();
+
+        assert!(creds.is_some());
+        let (fetched_id, fetched_hash) = creds.unwrap();
+        assert_eq!(fetched_id, updated_user.id.unwrap());
+        assert_eq!(
+            fetched_hash.0.expose_secret(),
+            updated_user.password.unwrap().0.expose_secret()
+        );
+    }
 }
