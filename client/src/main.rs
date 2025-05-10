@@ -1,4 +1,5 @@
-use client::{configuration::get_configuration, startup::Application};
+use client::startup::Application;
+use lib::config::get_configuration;
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {

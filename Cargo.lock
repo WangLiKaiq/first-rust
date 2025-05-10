@@ -825,7 +825,6 @@ dependencies = [
  "actix-web",
  "anyhow",
  "chrono",
- "config",
  "dotenvy",
  "lib",
  "sea-orm",
@@ -1937,9 +1936,13 @@ name = "lib"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "anyhow",
+ "config",
  "ctor",
  "dotenvy",
  "futures-util",
+ "serde",
+ "serde-aux",
  "tracing",
  "tracing-bunyan-formatter",
  "tracing-log 0.2.0",

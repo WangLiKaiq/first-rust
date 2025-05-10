@@ -20,7 +20,11 @@ dotenvy = "0.15"
 
 actix-web = { version = "4.10.2", optional = false }
 futures-util = { version = "0.3.31", optional = false }
-
+anyhow = "1.0.98"
+# need this to load the .env file
+serde = { version = "1.0.219", features = ["derive"] }
+serde-aux = { version = "^4.7" }
+config = "0.15.11"
 [dependencies.uuid]
 version = "1.16.0"
 # Lets you generate random UUIDs

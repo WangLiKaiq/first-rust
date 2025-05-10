@@ -23,7 +23,6 @@ tracing = { version = "0.1.41", features = ["log"] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde-aux = { version = "^4.7" }
 secrecy = { version = "^0.10", features = ["serde"] }
-config = "0.15.11"
 # actix
 actix-web = "^4.10"
 actix-http = "^3.10"

@@ -1,4 +1,5 @@
 use anyhow::Context;
+use serde::{Deserialize, de::DeserializeOwned};
 use serde_aux::field_attributes::deserialize_number_from_string;
 
 #[derive(serde::Deserialize, Clone)]
@@ -12,7 +13,10 @@ pub struct ApplicationSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
 }
-pub fn get_configuration() -> Result<Settings, anyhow::Error> {
+pub fn get_configuration<T>() -> Result<T, anyhow::Error>
+where
+    T: DeserializeOwned,
+{
     let base_path = std::env::current_dir().expect("Failed to determine the current directory.");
     let configuration_directory = base_path.join("configuration");
     let environment: Environment = std::env::var("APP_ENVIRONMENT")
@@ -34,7 +38,7 @@ pub fn get_configuration() -> Result<Settings, anyhow::Error> {
         )
         .build()?;
 
-    settings.try_deserialize::<Settings>().context("context")
+    settings.try_deserialize::<T>().context("context")
 }
 
 enum Environment {
