@@ -3,6 +3,7 @@
         "actix",
         "dotenv",
         "dotenvy",
+        "serde",
         "sqlx"
     ],
     "editor.formatOnSave": true,
