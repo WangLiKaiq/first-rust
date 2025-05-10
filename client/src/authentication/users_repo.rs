@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use argon2::{Argon2, PasswordHasher};
+use chrono::Utc;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, IntoActiveModel, QueryFilter,
     Set,
@@ -9,13 +9,13 @@ use uuid::Uuid;
 
 use crate::entities::users;
 
-use super::Credentials;
+use super::HashedPassword;
 
 #[tracing::instrument(name = "Get stored credentials", skip(db))]
 pub async fn get_stored_credentials(
     username: &str,
     db: &DatabaseConnection,
-) -> Result<Option<(Uuid, SecretString)>> {
+) -> Result<Option<(Uuid, HashedPassword)>> {
     let user = users::Entity::find()
         .filter(users::Column::Username.eq(username))
         .one(db)
@@ -24,7 +24,7 @@ pub async fn get_stored_credentials(
 
     Ok(user.and_then(|u| {
         Uuid::from_slice(&u.id).ok().map(|uuid| {
-            let hash = SecretString::new(u.password_hash.into_boxed_str());
+            let hash = HashedPassword(SecretString::new(u.password_hash.into_boxed_str()));
             (uuid, hash)
         })
     }))
@@ -34,7 +34,7 @@ pub async fn get_stored_credentials(
 pub struct SaveUser {
     id: Option<Uuid>,
     username: Option<String>,
-    password: Option<SecretString>,
+    password: Option<HashedPassword>,
     email: Option<SecretString>,
 }
 pub async fn save_user(db: &DatabaseConnection, user: SaveUser) -> Result<()> {
@@ -50,14 +50,6 @@ pub async fn save_user(db: &DatabaseConnection, user: SaveUser) -> Result<()> {
         None
     };
 
-    // Convert Option<T> to Set<T> for ActiveModel
-    fn to_set<T>(value: Option<T>) -> sea_orm::Set<T> {
-        match value {
-            Some(v) => Set::Value(v),
-            None => Set::Unset,
-        }
-    }
-
     match existing {
         Some(model) => {
             // Update existing
@@ -66,22 +58,23 @@ pub async fn save_user(db: &DatabaseConnection, user: SaveUser) -> Result<()> {
                 active_model.username = Set(username);
             }
             if let Some(password) = user.password {
-                active_model.password_hash = Set(password.expose_secret().clone());
+                active_model.password_hash = Set(password.0.expose_secret().to_owned());
             }
             if let Some(email) = user.email {
-                active_model.email = Set(email.expose_secret().clone());
+                active_model.email = Set(email.expose_secret().to_owned());
             }
 
             active_model.update(db).await?;
         }
         None => {
+            let uuid = user.id.unwrap_or(Uuid::new_v4());
             // Insert new
             let new = users::ActiveModel {
-                id: user.id.map(Set).unwrap_or(Set(Uuid::new_v4())),
-                username: to_set(user.username),
-                password_hash: to_set(user.password.map(|p| p.expose_secret().clone())),
-                email: to_set(user.email.map(|e| e.expose_secret().clone())),
-                ..Default::default()
+                id: Set(uuid.as_bytes().to_vec()),
+                username: Set(user.username.unwrap()),
+                password_hash: Set(user.password.unwrap().0.expose_secret().to_string()),
+                email: Set(user.email.unwrap().expose_secret().to_string()),
+                created_at: Set(Some(Utc::now())),
             };
             new.insert(db).await?;
         }

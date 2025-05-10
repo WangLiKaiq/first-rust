@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "actix",
+        "chrono",
         "dotenv",
         "dotenvy",
         "serde",
