@@ -86,12 +86,11 @@ pub async fn save_user(db: &DatabaseConnection, user: SaveUser) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::entities::users;
-    use actix_web::body::MessageBody;
+    use crate::authentication::RawPassword;
+    use argon2::password_hash::SaltString;
     use dotenvy::dotenv;
-    use lib::rand::rand_string;
-    use sea_orm::entity::prelude::*;
-    use sea_orm::{ConnectionTrait, Database, Schema};
+    use lib::rand::{rand_b64, rand_string};
+    use sea_orm::Database;
     use secrecy::SecretString;
     use uuid::Uuid;
 
@@ -100,16 +99,21 @@ mod tests {
             Self {
                 id: Some(Uuid::new_v4()),
                 username: Some(rand_string(10)),
-                password: Some(HashedPassword(SecretString::from(rand_string(10)))),
+                password: Some(
+                    HashedPassword::hash(
+                        &RawPassword(SecretString::from(rand_string(10))),
+                        &SaltString::from_b64(rand_b64(10).as_str()).unwrap(),
+                    )
+                    .unwrap(),
+                ),
                 email: Some(SecretString::from(rand_string(10))),
             }
         }
     }
+
     #[tokio::test]
-    async fn save_and_get_user_credentials_mysql() -> Result<()> {
+    async fn should_insert_user_correctly() {
         dotenv().ok();
-        let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set in .env");
-        let db = Database::connect(&db_url).await?;
 
         let user = SaveUser::rand();
 
@@ -126,7 +130,8 @@ mod tests {
             fetched_hash.0.expose_secret(),
             user.password.unwrap().0.expose_secret()
         );
-
-        Ok(())
     }
+
+    #[test]
+    async fn should_update_the_user_correctly() {}
 }

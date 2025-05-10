@@ -1961,6 +1961,7 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "anyhow",
+ "base64 0.22.1",
  "chrono",
  "config",
  "ctor",
@@ -1968,6 +1969,7 @@ dependencies = [
  "futures-util",
  "once_cell",
  "rand 0.9.1",
+ "sea-orm",
  "serde",
  "serde-aux",
  "tracing",
