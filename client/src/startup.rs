@@ -4,7 +4,7 @@ use lib::http::tracing::TraceMiddleware;
 use lib::log::init_subscriber;
 use std::net::TcpListener;
 
-use crate::config::Settings;
+use crate::configure::Settings;
 use crate::test::test_endpoint::test;
 pub struct Application {
     server: Server,

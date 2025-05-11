@@ -11,6 +11,7 @@ use crate::entities::users;
 
 use super::HashedPassword;
 
+pub struct UserRepository {}
 #[tracing::instrument(name = "Get stored credentials", skip(db))]
 pub async fn get_stored_credentials(
     username: &str,
