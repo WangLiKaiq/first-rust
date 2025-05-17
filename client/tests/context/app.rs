@@ -1,6 +1,6 @@
 use client::{
     configure::app::AppConfig,
-    server::{AppServer, state::AppState},
+    server::{AppServer, AppState},
 };
 use lib::config::{env::get_profiles, read_config};
 use test_context::AsyncTestContext;

@@ -1,8 +1,9 @@
-use crate::server::state::AppState;
-use actix_web::{HttpResponse, Responder, web};
+use actix_web::{Responder, web};
 use fake::Dummy;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+
+use crate::server::AppState;
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema, Dummy)]
 pub struct RegisterRequest {
