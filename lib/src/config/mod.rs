@@ -17,7 +17,7 @@ pub fn read_config<T: DeserializeOwned>(
 ) -> Result<T, ConfigError> {
     let config_dir = get_settings_dir()?;
     let mut builder =
-        Config::builder().add_source(File::from(config_dir.join("base.toml")).required(false));
+        Config::builder().add_source(File::from(config_dir.join("app-base.toml")).required(false));
 
     for profile in profiles {
         builder = builder
