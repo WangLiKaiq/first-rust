@@ -17,7 +17,7 @@ tracing = { version = "0.1.41", features = ["log"] }
 tracing-bunyan-formatter = "0.3.10"
 tracing-log = "0.2.0"
 dotenvy = "0.15"
-
+reqwest = { version = "0.12.9", features = ["json", "multipart", "stream"] }
 actix-web = { version = "4.10.2", optional = false }
 futures-util = { version = "0.3.31", optional = false }
 anyhow = "1.0.98"

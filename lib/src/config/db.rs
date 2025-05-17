@@ -1,4 +1,3 @@
-use sea_orm::ColIdx;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize, Clone)]

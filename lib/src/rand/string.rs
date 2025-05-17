@@ -28,7 +28,6 @@ pub fn rand_b64(len: usize) -> String {
 
 #[cfg(test)]
 mod test {
-    use base64::alphabet::BCRYPT;
 
     use super::*;
 
