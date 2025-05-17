@@ -4,4 +4,4 @@ pub mod http;
 pub mod log;
 pub mod rand;
 pub mod time;
-pub mod util:
+pub mod util;

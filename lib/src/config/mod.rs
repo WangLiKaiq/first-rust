@@ -1,5 +1,4 @@
 use config::{Config, ConfigError, File};
-use env::load_system_properties;
 use profile::Profile;
 use serde::de::DeserializeOwned;
 
@@ -13,12 +12,14 @@ pub mod profile;
 pub mod redis;
 pub mod server;
 
-pub fn read_config<T: DeserializeOwned>(profiles: Vec<Profile>) -> Result<T, ConfigError> {
+pub fn read_config<T: DeserializeOwned>(
+    profiles: impl Iterator<Item = Profile>,
+) -> Result<T, ConfigError> {
     let config_dir = get_settings_dir()?;
     let mut builder =
         Config::builder().add_source(File::from(config_dir.join("base.toml")).required(false));
 
-    for profile in &profiles {
+    for profile in profiles {
         builder = builder
             .add_source(File::from(config_dir.join(profile.filename())).required(true))
             .add_source(profile.env_source());
@@ -27,7 +28,6 @@ pub fn read_config<T: DeserializeOwned>(profiles: Vec<Profile>) -> Result<T, Con
 
     let config = builder.build()?;
 
-    load_system_properties();
     config.try_deserialize()
 }
 

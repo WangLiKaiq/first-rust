@@ -4,7 +4,7 @@ use lib::http::tracing::TraceMiddleware;
 use lib::log::init_subscriber;
 use std::net::TcpListener;
 
-use crate::configure::Settings;
+use crate::configure::app::AppConfig;
 use crate::test::test_endpoint::test;
 pub struct Application {
     server: Server,
@@ -12,7 +12,7 @@ pub struct Application {
 }
 
 impl Application {
-    pub async fn build(configuration: Settings) -> Result<Self, anyhow::Error> {
+    pub async fn build(configuration: AppConfig) -> Result<Self, anyhow::Error> {
         let address = format!(
             "{}:{}",
             configuration.application.host, configuration.application.port

@@ -1,3 +1,1 @@
-pub struct CreateUserUseCase<'a> {
-    user_repo: 
-}
+pub struct CreateUserUseCase<'a> {}

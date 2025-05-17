@@ -1,4 +1,4 @@
-use config::{ConfigError, Environment};
+use config::Environment;
 use serde::Deserialize;
 
 use super::env::get_env_source;

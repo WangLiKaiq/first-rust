@@ -6,7 +6,7 @@ use tracing_log::LogTracer;
 use tracing_subscriber::fmt::MakeWriter;
 use tracing_subscriber::{EnvFilter, Registry, layer::SubscriberExt};
 
-use crate::env::load_system_properties;
+use crate::config::env::load_system_properties;
 static INIT: Once = Once::new();
 
 #[ctor::ctor]

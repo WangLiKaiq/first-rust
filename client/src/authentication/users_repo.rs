@@ -88,7 +88,7 @@ pub async fn save_user(db: &DatabaseConnection, user: SaveUser) -> Result<()> {
 mod tests {
     use super::*;
     use crate::authentication::{PasswordSalt, RawPassword};
-    use lib::{db::get_conn_from_config, env::load_system_properties, rand::rand_string};
+    use lib::{config::env::load_system_properties, db::get_conn_from_config, rand::rand_string};
     use secrecy::SecretString;
     use uuid::Uuid;
 
