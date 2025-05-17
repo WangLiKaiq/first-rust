@@ -27,6 +27,9 @@ secrecy = { version = "^0.10", features = ["serde"] }
 actix-web = "^4.10"
 actix-http = "^3.10"
 argon2 = { version = "0.5.3", features = ["std"] }
+utoipa = { version = "5.2.0", features = ["axum_extras", "uuid", "chrono"] }
+utoipa-swagger-ui = { version = "9.0.0", features = ["axum"] }
+fake = { version = "4.3.0", features = ["derive", "uuid", "chrono"] }
 [dependencies.uuid]
 version = "1.16.0"
 # Lets you generate random UUIDs

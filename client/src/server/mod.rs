@@ -8,6 +8,8 @@ use state::AppState;
 use std::net::TcpListener;
 
 use crate::configure::app::AppConfig;
+use crate::handler::user;
+use crate::router::user::user_router;
 use crate::test::test_endpoint::test;
 pub struct AppServer {
     pub state: AppState,
@@ -23,8 +25,8 @@ impl AppServer {
         );
         let listener = TcpListener::bind(address)?;
         let port = listener.local_addr()?.port();
-        let server = Self::run(listener).await?;
         let state = AppState::new(configuration).await?;
+        let server = Self::run(state.clone(), listener).await?;
         Ok(Self {
             port,
             server,
@@ -43,12 +45,14 @@ impl AppServer {
     /**
      * We use this public function to expose the interface for test and user side.
      **/
-    async fn run(tcp_listener: TcpListener) -> Result<Server, anyhow::Error> {
+    async fn run(state: AppState, tcp_listener: TcpListener) -> Result<Server, anyhow::Error> {
         init_subscriber();
         let server = HttpServer::new(move || {
             App::new()
                 .wrap(TraceMiddleware)
                 .route("/test/dummy", web::get().to(test))
+                .service(user_router())
+                .app_data(web::Data::new(state.clone()))
         })
         .listen(tcp_listener)?
         .run();
