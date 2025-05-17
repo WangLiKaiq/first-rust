@@ -22,6 +22,7 @@ fn rand_save_user() -> SaveUser {
         email: Some(SecretString::from(rand_string(10))),
     }
 }
+#[tokio::test]
 /// test_context already have the async test mechanism, so #[tokio::test] is not required.
 #[test_context(AppTestContext)]
 async fn should_insert_user_correctly(context: &mut AppTestContext) {

@@ -12,8 +12,7 @@ use super::router::user::user_router;
 use super::state;
 pub struct AppServer {
     pub state: AppState,
-    server: Server,
-    port: u16,
+    tcp: std::net::TcpListener,
 }
 
 impl AppServer {
@@ -22,40 +21,29 @@ impl AppServer {
             "{}:{}",
             configuration.application.host, configuration.application.port
         );
-        let listener = TcpListener::bind(address)?;
-        let port = listener.local_addr()?.port();
+        let listener = std::net::TcpListener::bind(address)?;
         let state = AppState::new(configuration).await?;
-        let server = Self::run(state.clone(), listener).await?;
         Ok(Self {
-            port,
-            server,
+            tcp: listener,
             state,
         })
-    }
-
-    pub fn port(&self) -> u16 {
-        self.port
-    }
-
-    pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
-        self.server.await
     }
 
     /**
      * We use this public function to expose the interface for test and user side.
      **/
-    async fn run(state: AppState, tcp_listener: TcpListener) -> Result<Server, anyhow::Error> {
+    pub async fn start(self) -> Result<(), anyhow::Error> {
         init_subscriber();
         let server = HttpServer::new(move || {
             App::new()
                 .wrap(TraceMiddleware)
                 .route("/test/dummy", web::get().to(test))
                 .service(user_router())
-                .app_data(web::Data::new(state.clone()))
+                .app_data(web::Data::new(self.state.clone()))
         })
-        .listen(tcp_listener)?
+        .listen(self.tcp)?
         .run();
 
-        Ok(server)
+        Ok(())
     }
 }
