@@ -7,6 +7,7 @@ use lib::{
 
 use crate::configure::app::AppConfig;
 
+#[derive(Clone)]
 pub struct AppState {
     pub config: Arc<AppConfig>,
     pub db: Arc<DatabaseClient>,

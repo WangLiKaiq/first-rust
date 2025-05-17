@@ -6,7 +6,8 @@
         "dotenvy",
         "reqwest",
         "serde",
-        "sqlx"
+        "sqlx",
+        "wiremock"
     ],
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
