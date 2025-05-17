@@ -1,4 +1,5 @@
 use config::{Config, ConfigError, File};
+use env::load_system_properties;
 use profile::Profile;
 use serde::de::DeserializeOwned;
 
@@ -7,7 +8,6 @@ pub mod db;
 pub mod deserialize;
 pub mod env;
 pub mod http;
-pub mod load_env;
 pub mod loader;
 pub mod profile;
 pub mod redis;
@@ -22,13 +22,12 @@ pub fn read_config<T: DeserializeOwned>(profiles: Vec<Profile>) -> Result<T, Con
         builder = builder
             .add_source(File::from(config_dir.join(profile.filename())).required(true))
             .add_source(profile.env_source());
-    }
-
-    let config = builder.build()?;
-    for profile in &profiles {
         tracing::info!("Successfully read config profile: {profile}");
     }
 
+    let config = builder.build()?;
+
+    load_system_properties();
     config.try_deserialize()
 }
 

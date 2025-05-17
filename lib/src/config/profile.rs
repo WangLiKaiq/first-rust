@@ -25,20 +25,11 @@ pub enum Profile {
     #[serde(rename = "prod")]
     #[strum(serialize = "prod")]
     Prod,
-    #[serde(rename = "stg1")]
-    #[strum(serialize = "stg1")]
-    Stg1,
-    #[serde(rename = "stg2_1")]
-    #[strum(serialize = "stg2_1")]
-    Stg2_1,
-    #[serde(rename = "stg2_2")]
-    #[strum(serialize = "stg2_2")]
-    Stg2_2,
 }
 
 impl Profile {
     pub fn filename(&self) -> String {
-        format!("{self}.toml")
+        format!("app-{self}.toml")
     }
 
     pub fn env_source(&self) -> Environment {

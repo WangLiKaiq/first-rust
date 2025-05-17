@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use super::profile::Profile;
+use dotenvy::dotenv;
 
 pub fn get_env_source(prefix: &str) -> config::Environment {
     config::Environment::with_prefix(prefix)
@@ -13,4 +14,9 @@ pub fn get_profile() -> Result<Profile, String> {
         .map(|env| Profile::from_str(&env))
         .map_err(|e| e.to_string())?
         .map_err(|e| e.to_string())
+}
+
+pub fn load_system_properties() {
+    // loading the .env file from the current project root folder. client..etc..
+    dotenv().ok();
 }
