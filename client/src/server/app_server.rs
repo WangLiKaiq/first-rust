@@ -1,9 +1,7 @@
-use actix_web::dev::Server;
 use actix_web::{App, HttpServer, web};
 use lib::http::tracing::TraceMiddleware;
 use lib::log::init_subscriber;
 use state::AppState;
-use std::net::TcpListener;
 
 use crate::configure::app::AppConfig;
 
@@ -21,6 +19,7 @@ impl AppServer {
             "{}:{}",
             configuration.application.host, configuration.application.port
         );
+        tracing::info!("Server will start on {}", address);
         let listener = std::net::TcpListener::bind(address)?;
         let state = AppState::new(configuration).await?;
         Ok(Self {
@@ -34,7 +33,8 @@ impl AppServer {
      **/
     pub async fn start(self) -> Result<(), anyhow::Error> {
         init_subscriber();
-        let server = HttpServer::new(move || {
+
+        let _ = HttpServer::new(move || {
             App::new()
                 .wrap(TraceMiddleware)
                 .route("/test/dummy", web::get().to(test))

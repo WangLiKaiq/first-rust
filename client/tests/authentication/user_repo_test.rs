@@ -1,4 +1,3 @@
-use actix_web::App;
 use client::authentication::{
     HashedPassword, PasswordSalt, RawPassword, SaveUser, get_stored_credentials, save_user,
 };
