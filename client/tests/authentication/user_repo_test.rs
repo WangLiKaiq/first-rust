@@ -1,12 +1,13 @@
-use client::authentication::{
-    HashedPassword, PasswordSalt, RawPassword, SaveUser, get_stored_credentials, save_user,
+use crate::context::app::AppTestContext;
+use client::user::{
+    authentication::{HashedPassword, PasswordSalt, RawPassword},
+    *,
 };
 use lib::rand::rand_string;
+use redis::Commands;
 use secrecy::{ExposeSecret, SecretString};
 use test_context::test_context;
 use uuid::Uuid;
-
-use crate::context::app::AppTestContext;
 
 fn rand_save_user() -> SaveUser {
     SaveUser {
@@ -79,4 +80,15 @@ async fn should_update_the_user_correctly(context: &mut AppTestContext) {
         fetched_hash.0.expose_secret(),
         updated_user.password.unwrap().0.expose_secret()
     );
+}
+
+#[test_context(AppTestContext)]
+#[tokio::test]
+async fn test(context: &mut AppTestContext) {
+    let redis_client = context.state.redis_client.clone();
+    let mut conn = redis_client.get_connection().unwrap();
+    let token = Uuid::new_v4().to_string();
+
+    // Save token with a TTL (e.g., 1 hour)
+    conn.set_ex::<&str, &str, ()>("key", "value", 3600);
 }

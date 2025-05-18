@@ -10,7 +10,9 @@ password = "backend_password"
 database_name = "client"
 max_connections = 100
 
-redis_uri = "redis://127.0.0.1:6379"
+[redis]
+host = "127.0.0.1"
+port = "16379"
 
 [http]
 timeout = 8
