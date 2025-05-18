@@ -11,8 +11,8 @@ pub struct AppTestContext {
     pub mock_server: MockServer,
 }
 
-impl AppTestContext {
-    pub async fn setup() -> Self {
+impl AsyncTestContext for AppTestContext {
+    async fn setup() -> Self {
         let config: AppConfig = read_config(get_profiles()).unwrap();
         let server = AppServer::new(config).await.unwrap();
         let state = server.state.clone();
