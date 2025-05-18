@@ -11,17 +11,22 @@ pub struct AppTestContext {
     pub mock_server: MockServer,
 }
 
-impl AsyncTestContext for AppTestContext {
-    async fn setup() -> Self {
+impl AppTestContext {
+    pub async fn setup() -> Self {
         let config: AppConfig = read_config(get_profiles()).unwrap();
         let server = AppServer::new(config).await.unwrap();
         let state = server.state.clone();
-        server.start().await.unwrap();
+
+        tokio::spawn(async move {
+            let _ = server.start().await;
+        });
+
         let mock_server = MockServer::start().await;
-        Self { state, mock_server }
+
+        AppTestContext { state, mock_server }
     }
 
-    async fn teardown(self) -> () {
-        tracing::info!("Teardown done successfully.")
+    async fn teardown(self) {
+        tracing::info!("Teardown done successfully.");
     }
 }
