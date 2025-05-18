@@ -3,11 +3,11 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, ConnectionTrait, DatabaseConnection, EntityTrait,
-    IntoActiveModel, QueryFilter, Set,
+    IntoActiveModel, QueryFilter, Set, sqlx::Connection,
 };
 use secrecy::{ExposeSecret, SecretString};
 
-use super::{UserId, authentication::HashedPassword};
+use super::{Email, User, UserId, authentication::HashedPassword};
 
 pub struct UserRepository {}
 #[tracing::instrument(name = "Get stored credentials", skip(db))]
@@ -83,4 +83,31 @@ pub async fn save_user(db: &DatabaseConnection, user: SaveUser) -> Result<()> {
     }
 
     Ok(())
+}
+
+pub async fn fetch_by_id<C>(conn: &C, user_id: UserId) -> Result<User>
+where
+    C: ConnectionTrait,
+{
+    users::Entity::find_by_id(user_id)
+        .one(conn)
+        .await
+        .unwrap()
+        .map(User::try_from)
+        .transpose()?
+        .ok_or_else(|| anyhow::anyhow!("User not found"))
+}
+
+pub async fn fetch_by_username<C>(conn: &C, username: &String) -> Result<User>
+where
+    C: ConnectionTrait,
+{
+    users::Entity::find()
+        .filter(users::Column::Username.eq(username))
+        .one(conn)
+        .await
+        .unwrap()
+        .map(User::try_from)
+        .transpose()?
+        .ok_or_else(|| anyhow::anyhow!("User not found"))
 }

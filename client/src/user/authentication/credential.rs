@@ -1,3 +1,5 @@
+use std::hash::Hash;
+
 use anyhow::{Context, Result};
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier, password_hash::SaltString};
 use lib::rand::rand_b64;
@@ -40,6 +42,12 @@ impl HashedPassword {
             .into_boxed_str();
 
         Ok(Self(SecretString::new(hashed)))
+    }
+}
+
+impl From<String> for HashedPassword {
+    fn from(value: String) -> Self {
+        Self(SecretString::from(value))
     }
 }
 

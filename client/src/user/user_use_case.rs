@@ -1,4 +1,4 @@
-use std::{any, sync::Arc};
+use std::sync::Arc;
 
 use anyhow::{Result, anyhow};
 use sea_orm::{DatabaseConnection, TransactionTrait};
@@ -9,16 +9,26 @@ use crate::server::AppState;
 use super::{
     UserId,
     authentication::{HashedPassword, PasswordSalt, RawPassword},
+    fetch_by_username,
     users_repo::{SaveUser, get_stored_credentials, save_user},
 };
-
+#[derive(Debug)]
+pub enum CreateUserError {
+    UserAlreadyExisting,
+}
 pub async fn create_new_user(
     state: &AppState,
     username: String,
     password: RawPassword,
     email: SecretString,
-) {
+) -> Option<CreateUserError> {
     let hashed_password = HashedPassword::hash(&password, PasswordSalt::rand()).unwrap();
+    let tx = state.db.begin().await.unwrap();
+    let user = fetch_by_username(&tx, &username).await;
+    if let Ok(_) = user {
+        return Some(CreateUserError::UserAlreadyExisting);
+    }
+
     save_user(
         &state.db,
         SaveUser {
@@ -30,6 +40,7 @@ pub async fn create_new_user(
     )
     .await
     .unwrap();
+    None
 }
 
 pub async fn user_login(

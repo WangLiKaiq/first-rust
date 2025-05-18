@@ -33,16 +33,21 @@ pub async fn register(
     req: web::Json<RegisterRequest>,
 ) -> impl Responder {
     tracing::info!("state: , request: {:?}", req);
-    create_new_user(
+    let result = create_new_user(
         state.get_ref(),
         req.username.clone(),
         RawPassword(SecretString::from(req.password.clone())),
         SecretString::from(req.email.clone()),
     )
     .await;
-    web::Json(RegisterResponse {
-        business_error: Some("Successfully created a new.".to_string()),
-    })
+    match result {
+        None => web::Json(RegisterResponse {
+            business_error: None,
+        }),
+        Some(_) => web::Json(RegisterResponse {
+            business_error: Some("Failed to created a new user.".to_string()),
+        }),
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
