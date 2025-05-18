@@ -30,6 +30,8 @@ argon2 = { version = "0.5.3", features = ["std"] }
 utoipa = { version = "5.2.0", features = ["axum_extras", "uuid", "chrono"] }
 utoipa-swagger-ui = { version = "9.0.0", features = ["axum"] }
 fake = { version = "4.3.0", features = ["derive", "uuid", "chrono"] }
+jsonwebtoken = "9.3.1"
+redis = "0.31.0"
 [dependencies.uuid]
 version = "1.16.0"
 # Lets you generate random UUIDs

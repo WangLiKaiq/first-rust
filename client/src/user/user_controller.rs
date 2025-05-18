@@ -50,8 +50,29 @@ pub struct LoginRequest {
     username: String,
     password: String,
 }
+
+#[derive(Debug, Clone, Serialize)]
+pub enum LoginResponse {
+    Token {
+        token: String,
+        refresh_token: String,
+        access_token: String,
+        expire_in: u64,
+    },
+    Error {
+        business_error_code: ErrorCode,
+    },
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub enum ErrorCode {
+    InvalidCredentials,
+    AccountLocked,
+    Unknown,
+}
+
 pub async fn login(state: web::Data<AppState>, req: web::Json<LoginRequest>) -> HttpResponse {
-    let msg = if user_login(
+    let _msg = if user_login(
         &state,
         req.username.clone(),
         RawPassword(SecretString::from(req.password.clone())),
@@ -62,5 +83,7 @@ pub async fn login(state: web::Data<AppState>, req: web::Json<LoginRequest>) -> 
     } else {
         "Failed to login."
     };
-    HttpResponse::Ok().body(msg)
+    HttpResponse::Ok().json(LoginResponse::Error {
+        business_error_code: ErrorCode::InvalidCredentials,
+    })
 }
