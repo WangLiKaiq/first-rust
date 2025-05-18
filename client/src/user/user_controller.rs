@@ -1,4 +1,4 @@
-use actix_web::{Responder, web};
+use actix_web::{HttpResponse, Responder, web};
 use fake::Dummy;
 use secrecy::SecretString;
 use serde::{Deserialize, Serialize};
@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 use crate::{server::AppState, user::user_usecase::create_new_user};
 
-use super::authentication::RawPassword;
+use super::{authentication::RawPassword, user_usecase::user_login};
 
 #[derive(Debug, Clone, Deserialize, ToSchema, Dummy)]
 pub struct RegisterRequest {
@@ -43,4 +43,24 @@ pub async fn register(
     web::Json(RegisterResponse {
         business_error: Some("Successfully created a new.".to_string()),
     })
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct LoginRequest {
+    username: String,
+    password: String,
+}
+pub async fn login(state: web::Data<AppState>, req: web::Json<LoginRequest>) -> HttpResponse {
+    let msg = if user_login(
+        &state,
+        req.username.clone(),
+        RawPassword(SecretString::from(req.password.clone())),
+    )
+    .await
+    {
+        "Login successfully."
+    } else {
+        "Failed to login."
+    };
+    HttpResponse::Ok().body(msg)
 }
