@@ -1,8 +1,13 @@
+use std::{any, sync::Arc};
+
+use anyhow::{Result, anyhow};
+use sea_orm::{DatabaseConnection, TransactionTrait};
 use secrecy::SecretString;
 
 use crate::server::AppState;
 
 use super::{
+    UserId,
     authentication::{HashedPassword, PasswordSalt, RawPassword},
     users_repo::{SaveUser, get_stored_credentials, save_user},
 };
@@ -19,7 +24,7 @@ pub async fn create_new_user(
         SaveUser {
             username: Some(username),
             password: Some(hashed_password),
-            id: Some(uuid::Uuid::new_v4()),
+            id: Some(UserId::rand()),
             email: Some(email),
         },
     )
@@ -27,17 +32,20 @@ pub async fn create_new_user(
     .unwrap();
 }
 
-pub async fn user_login(state: &AppState, username: String, password: RawPassword) -> bool {
-    let credentials = get_stored_credentials(username.as_str(), &state.db)
-        .await
-        .unwrap();
+pub async fn user_login(
+    conn: Arc<DatabaseConnection>,
+    username: String,
+    password: RawPassword,
+) -> Result<UserId> {
+    let txn = conn.begin().await?;
 
-    if let Some((_, hashed_password)) = credentials {
-        match password.verify(&hashed_password) {
-            Ok(result) => result,
-            Err(_) => false,
-        }
-    } else {
-        false
+    let credentials = get_stored_credentials(&username, &txn).await?;
+
+    match credentials {
+        Some((user_id, hashed_password)) => match password.verify(&hashed_password) {
+            Ok(true) => Ok(user_id),
+            _ => Err(anyhow!("Invalid username or password")),
+        },
+        None => Err(anyhow!("Invalid username or password")),
     }
 }

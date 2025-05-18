@@ -1,22 +1,23 @@
+use crate::entities::users;
 use anyhow::{Context, Result};
 use chrono::Utc;
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, IntoActiveModel, QueryFilter,
-    Set,
+    ActiveModelTrait, ColumnTrait, ConnectionTrait, DatabaseConnection, EntityTrait,
+    IntoActiveModel, QueryFilter, Set,
 };
 use secrecy::{ExposeSecret, SecretString};
-use uuid::Uuid;
 
-use crate::entities::users;
-
-use super::authentication::HashedPassword;
+use super::{UserId, authentication::HashedPassword};
 
 pub struct UserRepository {}
 #[tracing::instrument(name = "Get stored credentials", skip(db))]
-pub async fn get_stored_credentials(
+pub async fn get_stored_credentials<C>(
     username: &str,
-    db: &DatabaseConnection,
-) -> Result<Option<(Uuid, HashedPassword)>> {
+    db: &C,
+) -> Result<Option<(UserId, HashedPassword)>>
+where
+    C: ConnectionTrait,
+{
     let user = users::Entity::find()
         .filter(users::Column::Username.eq(username))
         .one(db)
@@ -24,23 +25,23 @@ pub async fn get_stored_credentials(
         .context("Failed to fetch user from DB")?;
 
     Ok(user.and_then(|u| {
-        Uuid::from_slice(&u.id).ok().map(|uuid| {
-            let hash = HashedPassword(SecretString::new(u.password_hash.into_boxed_str()));
-            (uuid, hash)
-        })
+        let user_id: UserId =
+            UserId::from_bytes(&u.id).unwrap_or_else(|_| panic!("Invalid userId: {:?}", u.id));
+        let hash = HashedPassword(SecretString::new(u.password_hash.into_boxed_str()));
+        Some((user_id, hash))
     }))
 }
 
 #[derive(Clone)]
 pub struct SaveUser {
-    pub id: Option<Uuid>,
+    pub id: Option<UserId>,
     pub username: Option<String>,
     pub password: Option<HashedPassword>,
     pub email: Option<SecretString>,
 }
 pub async fn save_user(db: &DatabaseConnection, user: SaveUser) -> Result<()> {
     // Attempt to find existing user by ID if provided
-    let existing = if let Some(id) = user.id {
+    let existing = if let Some(id) = user.id.clone() {
         users::Entity::find_by_id(id).one(db).await?
     } else if let Some(ref username) = user.username {
         users::Entity::find()
@@ -68,7 +69,7 @@ pub async fn save_user(db: &DatabaseConnection, user: SaveUser) -> Result<()> {
             active_model.update(db).await?;
         }
         None => {
-            let uuid = user.id.unwrap_or(Uuid::new_v4());
+            let uuid = user.id.unwrap_or(UserId::rand());
             // Insert new
             let new = users::ActiveModel {
                 id: Set(uuid.as_bytes().to_vec()),

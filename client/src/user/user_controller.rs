@@ -72,18 +72,22 @@ pub enum ErrorCode {
 }
 
 pub async fn login(state: web::Data<AppState>, req: web::Json<LoginRequest>) -> HttpResponse {
-    let _msg = if user_login(
-        &state,
+    let res = match user_login(
+        state.db.clone(),
         req.username.clone(),
         RawPassword(SecretString::from(req.password.clone())),
     )
     .await
     {
-        "Login successfully."
-    } else {
-        "Failed to login."
+        Ok(_) => LoginResponse::Token {
+            token: "1234".to_string(),
+            refresh_token: "1234".to_string(),
+            access_token: "1234".to_string(),
+            expire_in: 1,
+        },
+        Err(_) => LoginResponse::Error {
+            business_error_code: ErrorCode::AccountLocked,
+        },
     };
-    HttpResponse::Ok().json(LoginResponse::Error {
-        business_error_code: ErrorCode::InvalidCredentials,
-    })
+    HttpResponse::Ok().json(res)
 }
