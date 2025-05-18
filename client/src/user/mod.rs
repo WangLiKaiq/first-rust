@@ -1,5 +1,5 @@
 mod user_controller;
-mod user_usecase;
+mod user_use_case;
 mod users_repo;
 pub use user_controller::*;
 pub mod token;

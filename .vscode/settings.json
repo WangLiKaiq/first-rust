@@ -4,6 +4,7 @@
         "chrono",
         "dotenv",
         "dotenvy",
+        "jsonwebtoken",
         "reqwest",
         "serde",
         "sqlx",

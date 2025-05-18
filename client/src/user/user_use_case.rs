@@ -1,4 +1,3 @@
-use actix_web::App;
 use secrecy::SecretString;
 
 use crate::server::AppState;

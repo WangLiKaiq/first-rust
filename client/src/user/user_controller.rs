@@ -4,9 +4,9 @@ use secrecy::SecretString;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::{server::AppState, user::user_usecase::create_new_user};
+use crate::{server::AppState, user::user_use_case::create_new_user};
 
-use super::{authentication::RawPassword, user_usecase::user_login};
+use super::{authentication::RawPassword, user_use_case::user_login};
 
 #[derive(Debug, Clone, Deserialize, ToSchema, Dummy)]
 pub struct RegisterRequest {
