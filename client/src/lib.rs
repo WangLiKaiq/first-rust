@@ -1,4 +1,3 @@
-pub mod authentication;
 pub mod configure;
 pub mod constant;
 pub mod entities;

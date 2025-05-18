@@ -34,7 +34,7 @@ impl AppServer {
     pub async fn start(self) -> Result<(), anyhow::Error> {
         init_subscriber();
 
-        let _ = HttpServer::new(move || {
+        let server = HttpServer::new(move || {
             App::new()
                 .wrap(TraceMiddleware)
                 .route("/test/dummy", web::get().to(test))
@@ -43,7 +43,7 @@ impl AppServer {
         })
         .listen(self.tcp)?
         .run();
-
+        server.await.unwrap();
         Ok(())
     }
 }

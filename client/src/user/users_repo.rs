@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::entities::users;
 
-use super::HashedPassword;
+use super::authentication::HashedPassword;
 
 pub struct UserRepository {}
 #[tracing::instrument(name = "Get stored credentials", skip(db))]
