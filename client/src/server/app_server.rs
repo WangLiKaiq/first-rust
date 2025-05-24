@@ -1,9 +1,11 @@
+use actix_web::middleware::from_fn;
 use actix_web::{App, HttpServer, web};
 use lib::http::tracing::TraceMiddleware;
 use lib::log::init_subscriber;
 use state::AppState;
 
 use crate::configure::app::AppConfig;
+use crate::user::authentication::reject_anonymous_users;
 
 use super::router::test::test;
 use super::router::user::user_router;
@@ -37,7 +39,10 @@ impl AppServer {
         let server = HttpServer::new(move || {
             App::new()
                 .wrap(TraceMiddleware)
-                .route("/test/dummy", web::get().to(test))
+                .route(
+                    "/test/dummy",
+                    web::get().to(test).wrap(from_fn(reject_anonymous_users)),
+                )
                 .service(user_router())
                 .app_data(web::Data::new(self.state.clone()))
         })

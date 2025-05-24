@@ -8,7 +8,7 @@ use crate::configure::app::AppConfig;
 pub static CONFIG: LazyLock<AppConfig> = LazyLock::new(|| read_config(get_profiles()).unwrap());
 
 pub static AUTHORIZATION: &str = "Authorization";
-pub static BEARER: &str = "Bearer";
+pub static BEARER: &str = "Bearer ";
 pub static TOKEN_SECRET: LazyLock<SecretString> =
     LazyLock::new(|| secrecy::SecretString::from("the-default-secret"));
 

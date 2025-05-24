@@ -1,6 +1,6 @@
 use super::{Claims, ClaimsToken};
 use crate::{
-    constant::{TOKEN_DURATION_SECONDS, TOKEN_SECRET},
+    constant::{BEARER, TOKEN_DURATION_SECONDS, TOKEN_SECRET},
     user::UserId,
 };
 use anyhow::{Result, anyhow};
@@ -24,4 +24,14 @@ pub fn create_token(user_id: UserId) -> Result<ClaimsToken> {
 pub fn get_claims_from_token(token: ClaimsToken) -> Result<Claims> {
     let token_data = token.to_claims(TOKEN_SECRET.clone())?;
     Ok(token_data.claims)
+}
+
+pub fn get_claims_from_header(header: &str) -> Result<Claims> {
+    let token_raw = header.strip_prefix(BEARER);
+    let token = match token_raw {
+        Some(token) => ClaimsToken(token.to_string()),
+        None => return Err(anyhow::anyhow!("Invalid token header")),
+    };
+
+    get_claims_from_token(token)
 }

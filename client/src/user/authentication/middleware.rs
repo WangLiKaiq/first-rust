@@ -1,28 +1,42 @@
-// use actix_web_lab::middleware::Next;
-// use actix_web::body::MessageBody;
-// use actix_web::dev::{ ServiceRequest, ServiceResponse };
-// use crate::session_state::TypedSession;
-// use crate::utils::e500;
-// use actix_web::{FromRequest, HttpResponse};
-// use actix_web::error::InternalError;
+use actix_web::body::MessageBody;
+use actix_web::dev::{ServiceRequest, ServiceResponse};
+use actix_web::middleware::Next;
+use actix_web::{HttpMessage, HttpResponse};
 
-// pub async fn reject_anonymous_users(
-//     mut req: ServiceRequest,
-//     next: Next<impl MessageBody>
-// ) -> Result<ServiceResponse<impl MessageBody>, actix_web::Error> {
-//     let session = ({
-//         let (http_request, payload) = req.parts_mut();
-//         TypedSession::from_request(http_request, payload).await
-//     })?;
-//     match session.get_user_id().map_err(e500)? {
-//         Some(_) => next.call(req).await,
+use crate::constant::AUTHORIZATION;
+use crate::user::token::{Claims, get_claims_from_header};
 
-//         None => {
-//             let response =  HttpResponse::SeeOther()
-//             .insert_header((actix_web::http::header::LOCATION, "/admin/dashboard"))
-//             .finish();
-//             let e = anyhow::anyhow!("The user has not logged in");
-//             Err(InternalError::from_response(e, response).into())
-//         }
-//     }
-// }
+pub async fn reject_anonymous_users(
+    mut req: ServiceRequest,
+    next: Next<impl MessageBody + 'static>,
+) -> Result<ServiceResponse<impl MessageBody>, actix_web::Error> {
+    match extract_and_attach_claims(&mut req) {
+        Ok(_) => {}
+        Err(e) => {
+            tracing::error!("The authorization is failed due to: {e:?}");
+            return Ok(
+                req.into_response(HttpResponse::Unauthorized().body("Authorization failed."))
+            );
+        }
+    }
+
+    let res = next.call(req).await?;
+
+    let (req, res_body) = res.into_parts();
+    req.extensions_mut().remove::<Claims>();
+    Ok(ServiceResponse::new(req, res_body.map_into_boxed_body()))
+}
+
+fn extract_and_attach_claims(req: &mut ServiceRequest) -> Result<(), anyhow::Error> {
+    let header = req
+        .headers()
+        .get(AUTHORIZATION)
+        .ok_or_else(|| anyhow::anyhow!("Missing authorization header."))?;
+
+    let header_str = header.to_str()?;
+
+    let claims = get_claims_from_header(header_str)?;
+    req.extensions_mut().insert(claims);
+
+    Ok(())
+}

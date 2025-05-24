@@ -1,4 +1,6 @@
-use crate::user::UserId;
+use std::any;
+
+use crate::{constant::BEARER, user::UserId};
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, TokenData, Validation, decode, encode};
 use secrecy::{ExposeSecret, SecretString};
 use serde::{Deserialize, Serialize};
@@ -10,7 +12,7 @@ pub struct Claims {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ClaimsToken(String);
+pub struct ClaimsToken(pub String);
 
 impl ClaimsToken {
     pub fn from(claims: Claims, secret: SecretString) -> Self {
