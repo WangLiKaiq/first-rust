@@ -3,11 +3,11 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, ConnectionTrait, DatabaseConnection, EntityTrait,
-    IntoActiveModel, QueryFilter, Set, sqlx::Connection,
+    IntoActiveModel, QueryFilter, Set,
 };
 use secrecy::{ExposeSecret, SecretString};
 
-use super::{Email, User, UserId, authentication::HashedPassword};
+use super::{User, UserId, authentication::HashedPassword};
 
 pub struct UserRepository {}
 #[tracing::instrument(name = "Get stored credentials", skip(db))]

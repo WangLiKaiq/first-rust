@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 use crate::{server::AppState, user::user_use_case::create_new_user};
 
-use super::{authentication::RawPassword, user_use_case::user_login};
+use super::{authentication::RawPassword, token::ClaimsToken, user_use_case::user_login};
 
 #[derive(Debug, Clone, Deserialize, ToSchema, Dummy)]
 pub struct RegisterRequest {
@@ -57,16 +57,17 @@ pub struct LoginRequest {
 }
 
 #[derive(Debug, Clone, Serialize)]
+pub struct Token {
+    pub token: ClaimsToken,
+    pub refresh_token: String,
+    pub access_token: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(tag = "type", content = "data")]
 pub enum LoginResponse {
-    Token {
-        token: String,
-        refresh_token: String,
-        access_token: String,
-        expire_in: u64,
-    },
-    Error {
-        business_error_code: ErrorCode,
-    },
+    Token(Token),
+    Error { business_error_code: ErrorCode },
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -84,12 +85,11 @@ pub async fn login(state: web::Data<AppState>, req: web::Json<LoginRequest>) -> 
     )
     .await
     {
-        Ok(_) => LoginResponse::Token {
-            token: "1234".to_string(),
+        Ok(token) => LoginResponse::Token(Token {
+            token: token,
             refresh_token: "1234".to_string(),
             access_token: "1234".to_string(),
-            expire_in: 1,
-        },
+        }),
         Err(_) => LoginResponse::Error {
             business_error_code: ErrorCode::AccountLocked,
         },

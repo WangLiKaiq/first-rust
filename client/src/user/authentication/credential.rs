@@ -1,5 +1,3 @@
-use std::hash::Hash;
-
 use anyhow::{Context, Result};
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier, password_hash::SaltString};
 use lib::rand::rand_b64;

@@ -10,6 +10,7 @@ use super::{
     UserId,
     authentication::{HashedPassword, PasswordSalt, RawPassword},
     fetch_by_username,
+    token::{ClaimsToken, create_token},
     users_repo::{SaveUser, get_stored_credentials, save_user},
 };
 #[derive(Debug)]
@@ -47,14 +48,17 @@ pub async fn user_login(
     conn: Arc<DatabaseConnection>,
     username: String,
     password: RawPassword,
-) -> Result<UserId> {
+) -> Result<ClaimsToken> {
     let txn = conn.begin().await?;
 
     let credentials = get_stored_credentials(&username, &txn).await?;
 
     match credentials {
         Some((user_id, hashed_password)) => match password.verify(&hashed_password) {
-            Ok(true) => Ok(user_id),
+            Ok(true) => {
+                let token = create_token(user_id.clone())?;
+                Ok(token)
+            }
             _ => Err(anyhow!("Invalid username or password")),
         },
         None => Err(anyhow!("Invalid username or password")),

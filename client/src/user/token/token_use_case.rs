@@ -1,48 +1,27 @@
-use chrono::{Duration, Utc};
-use jsonwebtoken::{DecodingKey, EncodingKey, Header, TokenData, Validation, decode, encode};
-use uuid::Uuid;
+use super::{Claims, ClaimsToken};
+use crate::{
+    constant::{TOKEN_DURATION_SECONDS, TOKEN_SECRET},
+    user::UserId,
+};
+use anyhow::{Result, anyhow};
+use lib::time::clock::now_jst;
+use time::Duration;
 
-use super::Claims;
-
-const SECRET: &[u8] = b"your-secret-key";
-
-pub fn create_token(user_id: Uuid) -> String {
-    let expiration = Utc::now()
-        .checked_add_signed(Duration::minutes(60))
-        .expect("valid timestamp")
-        .timestamp() as u64;
+pub fn create_token(user_id: UserId) -> Result<ClaimsToken> {
+    let expiration = now_jst()
+        .checked_add(Duration::seconds(TOKEN_DURATION_SECONDS))
+        .ok_or_else(|| anyhow!("Failed to calculate the expiration time."))?
+        .unix_timestamp() as u64;
 
     let claims = Claims {
-        subject: user_id,
-        expiration,
+        sub: user_id,
+        exp: expiration,
     };
 
-    encode(
-        &Header::default(),
-        &claims,
-        &EncodingKey::from_secret(SECRET),
-    )
-    .unwrap()
+    Ok(ClaimsToken::from(claims, TOKEN_SECRET.clone()))
 }
 
-pub fn verify_token(token: &str) -> Result<TokenData<Claims>, jsonwebtoken::errors::Error> {
-    decode::<Claims>(
-        token,
-        &DecodingKey::from_secret(SECRET),
-        &Validation::default(),
-    )
-}
-
-#[cfg(test)]
-mod tests {
-    use uuid::Uuid;
-
-    use crate::user::token::create_token;
-
-    #[tokio::test]
-    async fn test_create_token() {
-        let token = create_token(Uuid::new_v4());
-
-        println!("The generated token is: {}", token);
-    }
+pub fn get_claims_from_token(token: ClaimsToken) -> Result<Claims> {
+    let token_data = token.to_claims(TOKEN_SECRET.clone())?;
+    Ok(token_data.claims)
 }
